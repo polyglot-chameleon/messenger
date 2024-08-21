@@ -10,7 +10,7 @@ import (
 var Chat *fyne.Container
 
 func init() {
-	data := binding.BindStringList(&[]string{"a", "string", "list"})
+	data := binding.BindStringList(&[]string{})
 
 	textArea := widget.NewMultiLineEntry()
 
@@ -26,7 +26,10 @@ func init() {
 	form := &widget.Form{
 		Items: []*widget.FormItem{
 			{Widget: textArea}},
-		OnSubmit: func() { data.Append(textArea.Text) },
+		OnSubmit: func() {
+			data.Append(textArea.Text)
+			textArea.SetText("")
+		},
 	}
 
 	Chat = container.NewBorder(nil, form, nil, nil, list)
