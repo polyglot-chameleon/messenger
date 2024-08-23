@@ -8,6 +8,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type MessageResource struct {
+	TextContent string
+	Incoming    bool
+}
+
 type messageController struct {
 	db *sql.DB
 }
@@ -26,16 +31,16 @@ func (mc *messageController) WriteMessage(chat_id int, text_content string) {
 	}
 }
 
-func (mc *messageController) ReadMessages(chat_id int) []string {
-	rows, _ := mc.db.Query("SELECT text_content FROM messages;")
+func (mc *messageController) ReadMessages(chat_id int) []any {
+	rows, _ := mc.db.Query("SELECT text_content, incoming FROM messages;")
 	defer rows.Close()
 
-	var messages []string
+	var messages []any
+	message := MessageResource{TextContent: "", Incoming: false}
 
 	for rows.Next() {
-		var text_content string
-		rows.Scan(&text_content)
-		messages = append(messages, text_content)
+		rows.Scan(&message.TextContent, &message.Incoming)
+		messages = append(messages, message)
 	}
 
 	return messages
