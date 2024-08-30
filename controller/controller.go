@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"log"
 
+	"fyne.io/fyne/v2/data/binding"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type MessageResource struct {
+	ChatID      int
 	TextContent string
 	Incoming    bool
 }
@@ -18,14 +20,23 @@ type messageController struct {
 }
 
 var MessageController *messageController
+var data binding.UntypedList
 
 func init() {
 	MessageController = &messageController{}
 	MessageController.db, _ = sql.Open("sqlite3", "db/messenger.db")
 }
 
-func (mc *messageController) WriteMessage(chat_id int, text_content string) {
-	_, err := mc.db.Exec(fmt.Sprintf("INSERT INTO messages(chat_id, text_content) VALUES (1, '%s')", text_content))
+func (mc *messageController) WriteMessage(newMsg MessageResource) {
+
+	var incoming int
+	if newMsg.Incoming {
+		incoming = 1
+	} else {
+		incoming = 0
+	}
+
+	_, err := mc.db.Exec(fmt.Sprintf("INSERT INTO messages(chat_id, incoming, text_content) VALUES (1, %v, '%s');", incoming, newMsg.TextContent))
 	if err != nil {
 		log.Fatal(err)
 	}

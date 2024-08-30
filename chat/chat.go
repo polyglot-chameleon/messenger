@@ -10,10 +10,11 @@ import (
 )
 
 var Chat *fyne.Container
+var data binding.UntypedList
 
 func init() {
 	messages := controller.MessageController.ReadMessages(1)
-	data := binding.NewUntypedList()
+	data = binding.NewUntypedList()
 	data.Set(messages)
 
 	textArea := widget.NewMultiLineEntry()
@@ -43,11 +44,18 @@ func init() {
 		Items: []*widget.FormItem{
 			{Widget: textArea}},
 		OnSubmit: func() {
-			data.Append(textArea.Text)
-			controller.MessageController.WriteMessage(1, textArea.Text)
+			update(textArea.Text, false)
 			textArea.SetText("")
 		},
 	}
 
 	Chat = container.NewBorder(nil, form, nil, nil, list)
+}
+
+func update(msg string, incoming bool) {
+	newMsg := controller.MessageResource{ChatID: 1, TextContent: msg, Incoming: incoming}
+
+	data.Append(newMsg)
+	controller.MessageController.WriteMessage(newMsg)
+	Server.Send([]byte(newMsg.TextContent), 0)
 }
